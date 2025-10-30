@@ -5,7 +5,7 @@ import { Route, RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { store } from './store/store.js'
 import { Provider } from 'react-redux'
 import App from './App.jsx'
-import EcommerceDashboard from './components/EcommerceDashboard/EcommerceDashboard.jsx'
+import Dashboard from './components/Dashboard/Dashboard.jsx'
 import OrderList from './components/orderList/OrderList.jsx'
 
 const router = createBrowserRouter([
@@ -15,7 +15,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <EcommerceDashboard />,
+        element: <Dashboard />,
       },
       {
         path: '/orderlist',
