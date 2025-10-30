@@ -2,16 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  TrendingUp,
-  TrendingDown,
-  ArrowUpward,
-  ArrowDownward,
-} from "@mui/icons-material";
-import BarChartC from "../StackedBarChart/StackedBarChart";
 import StackedBarChart from "../StackedBarChart/StackedBarChart";
-import LineChart from "../lineChart/LineChart";
-import WorldMap from "../worldMap/WorldMap";
 import TableData from "../table/TableData";
 import DonutChart from "../donutChart/DonutChart";
 import {
@@ -23,6 +14,7 @@ import {
   setAllDistrict,
   setIsLoading,
 } from "../../store/features/data/dataSlice";
+import { Loader } from "lucide-react";
 
 const EcommerceDashboard = () => {
   const dispatch = useDispatch();
@@ -497,7 +489,10 @@ const EcommerceDashboard = () => {
         </>
       ) : (
         <>
-          <div>loading...</div>
+          <div className=" flex flex-col justify-center items-center">
+            <Loader />
+            <p>Please allow location access if you want to see the dashboard</p>
+          </div>
         </>
       )}
       {/* Top Stats Cards */}
