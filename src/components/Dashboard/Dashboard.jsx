@@ -90,34 +90,37 @@ const EcommerceDashboard = () => {
     if (dataset.length == 0) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          fetch(
-            `https://menrega.onrender.com/api/reverse-geocode?lat=${position.coords.latitude}&lon=${position.coords.longitude}`
-          )
-            .then((res) => res.json())
-            .then((data) => {
-              // console.log(data?.address?.state?.toUpperCase())
-              dispatch(
-                setState(
-                  indianStatesAndUTs[data?.address?.state?.toUpperCase()]
-                )
-              );
-              dispatch(
-                setDistrict(data?.address?.state_district?.toUpperCase())
-              );
-              setUserDistrict(data?.address?.state_district?.toUpperCase());
+          // fetch(
+          //   `https://menrega.onrender.com/api/reverse-geocode?lat=${position.coords.latitude}&lon=${position.coords.longitude}`
+          // )
+          //   .then((res) => res.json())
+          //   .then((data) => {
+          //     // console.log(data?.address?.state?.toUpperCase())
+          //     dispatch(
+          //       setState(
+          //         indianStatesAndUTs[data?.address?.state?.toUpperCase()]
+          //       )
+          //     );
+          //     dispatch(
+          //       setDistrict(data?.address?.state_district?.toUpperCase())
+          //     );
+          //     setUserDistrict(data?.address?.state_district?.toUpperCase());
+          //   })
+          //   .catch((error) => {
+          //     console.log("error from our backend",error);
+          //   });
+
+          fetch(`https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`)
+            .then(res => res.json())
+            .then(data => {
+              console.log("user location",data)
+              dispatch(setState(indianStatesAndUTs[data?.address?.state?.toUpperCase()]))
+              dispatch(setDistrict(data?.address?.state_district?.toUpperCase()))
+              setUserDistrict(data?.address?.state_district?.toUpperCase())
             })
             .catch((error) => {
-              console.log(error);
+              console.log("error from nominatim api",error);
             });
-
-          // fetch(`https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`)
-          //   .then(res => res.json())
-          //   .then(data => {
-          //     console.log("user location",data)
-          //     dispatch(setState(indianStatesAndUTs[data?.address?.state?.toUpperCase()]))
-          //     dispatch(setDistrict(data?.address?.state_district?.toUpperCase()))
-          //     setUserDistrict(data?.address?.state_district?.toUpperCase())
-          //   });
 
           // THIS IS FOR THE AWS LAMBDA API RESPONSE
         },
