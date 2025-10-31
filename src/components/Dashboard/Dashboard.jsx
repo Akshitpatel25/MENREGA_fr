@@ -87,54 +87,29 @@ const EcommerceDashboard = () => {
 
   // getting user coordinates
   useEffect(() => {
-    if (dataset.length == 0) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          // fetch(
-          //   `https://menrega.onrender.com/api/reverse-geocode?lat=${position.coords.latitude}&lon=${position.coords.longitude}`
-          // )
-          //   .then((res) => res.json())
-          //   .then((data) => {
-          //     // console.log(data?.address?.state?.toUpperCase())
-          //     dispatch(
-          //       setState(
-          //         indianStatesAndUTs[data?.address?.state?.toUpperCase()]
-          //       )
-          //     );
-          //     dispatch(
-          //       setDistrict(data?.address?.state_district?.toUpperCase())
-          //     );
-          //     setUserDistrict(data?.address?.state_district?.toUpperCase());
-          //   })
-          //   .catch((error) => {
-          //     console.log("error from our backend",error);
-          //   });
-
-          fetch(`https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`)
-            .then(res => res.json())
-            .then(data => {
-              console.log("user location",data)
-              dispatch(setState(indianStatesAndUTs[data?.address?.state?.toUpperCase()]))
-              dispatch(setDistrict(data?.address?.state_district?.toUpperCase()))
-              setUserDistrict(data?.address?.state_district?.toUpperCase())
-            })
-            .catch((error) => {
-              console.log("error from nominatim api",error);
-            });
-
-          // THIS IS FOR THE AWS LAMBDA API RESPONSE
-        },
-        (error) => {
-          console.error("Location error:", error);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
+    if (dataset.length === 0) {
+      // Check location permission state
+      navigator.permissions.query({ name: "geolocation" }).then((result) => {
+        if (result.state === "granted") {
+          // Permission already granted → get location directly
+          getUserLocation();
+        } else if (result.state === "prompt") {
+          // User hasn't decided yet → ask for location
+          askForLocation();
+        } else if (result.state === "denied") {
+          // User has denied → show manual state/district selection
+          console.warn("Location access denied. Please select manually.");
+          alert("Please select your State and District manually.");
         }
-      );
+
+        // Optional: listen for changes (in case user changes browser setting)
+        result.onchange = () => {
+          if (result.state === "granted") getUserLocation();
+        };
+      });
     }
   }, []);
+
 
   // all district of state
   useEffect(() => {
@@ -183,6 +158,63 @@ const EcommerceDashboard = () => {
 
     globalSum();
   }, [dataset]);
+
+  function getUserLocation() {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            // console.log("User location:", data);
+            dispatch(setState(indianStatesAndUTs[data?.address?.state?.toUpperCase()]));
+            dispatch(setDistrict(data?.address?.state_district?.toUpperCase()));
+            setUserDistrict(data?.address?.state_district?.toUpperCase());
+          })
+          .catch((error) => console.log("Error from nominatim api:", error));
+      },
+      (error) => {
+        console.error("Location error:", error);
+        alert("Unable to get your location. Please select manually.");
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+
+    // fetch(
+    //   `https://menrega.onrender.com/api/reverse-geocode?lat=${position.coords.latitude}&lon=${position.coords.longitude}`
+    // )
+    //   .then((res) => res.json())
+    //   .then((data) => {
+    //     // console.log(data?.address?.state?.toUpperCase())
+    //     dispatch(
+    //       setState(
+    //         indianStatesAndUTs[data?.address?.state?.toUpperCase()]
+    //       )
+    //     );
+    //     dispatch(
+    //       setDistrict(data?.address?.state_district?.toUpperCase())
+    //     );
+    //     setUserDistrict(data?.address?.state_district?.toUpperCase());
+    //   })
+    //   .catch((error) => {
+    //     console.log("error from our backend",error);
+    //   });
+  }         
+
+  function askForLocation() {
+    // This will trigger the browser’s native permission prompt
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        getUserLocation();
+      },
+      (error) => {
+        console.error("User denied location:", error);
+        alert("Please allow location access or select manually.");
+      }
+    );
+  }
+
 
 
   function globalSum() {
